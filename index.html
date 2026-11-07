@@ -557,7 +557,7 @@ body.v2 .v2-eteinte{opacity:.6}
 // Estampille posée par publier.js, IDENTIQUE à celle du cache de sw.js. Sert à
 // détecter qu'un onglet resté ouvert exécute encore l'ancien code : il ne navigue
 // pas, donc ne repasse jamais par le réseau, et rien ne l'en avertissait.
-const Cst_Version = 'vigie-202610161651';
+const Cst_Version = 'vigie-202611072108';
 const Cst_CleStockage = 'vigie-portefeuille';
 const Cst_CleApiKey   = 'vigie-portefeuille-apikey'; // localStorage UNIQUEMENT (jamais window.storage, jamais le fichier)
 const Cst_IsArtifact  = !!(window.storage && typeof window.storage.get === 'function');
@@ -3220,7 +3220,7 @@ const Cst_LignesIgnorees = [
   // zone : elles ne portent aucune donnée de portefeuille et n'ont rien à faire
   // en « ligne non reconnue ». Le découpage les retire déjà — ceci n'est que le
   // filet pour un collage à l'ancienne.
-  /^===VIGIE:/, /^(version|capture|statut|maj_degiro|noeuds_|ordres_|historique|valeur_gage|facilite_credit|duree_s|format_|lignes_|pages_|transactions_)\w*=/i
+  /^===VIGIE:/, /^(version|capture|statut|compte|maj_degiro|noeuds_|ordres_|historique|valeur_gage|facilite_credit|duree_s|format_|lignes_|pages_|transactions_)\w*=/i
 ];
 // Heures et dates ne sont pas des montants : elles sont neutralisées AVANT la
 // lecture des nombres, en préservant les positions dans la ligne (remplacement
@@ -3275,7 +3275,10 @@ function Fn_ParserMeta(texte) {
 const Cst_MotsAchat = /\b(achat|acheter|buy)\b/i;
 const Cst_MotsVente = /\b(vente|vendre|sell)\b/i;
 const Cst_ReIsin = /\b([A-Z]{2}[A-Z0-9]{9}[0-9])\b/;
-const Cst_ReDevise = /\b(EUR|USD|GBP|CHF|JPY|SEK|NOK|DKK|CAD|AUD|HKD)\b/;
+/* GBX : le PENNY britannique (centième de livre). Londres cote en pence : « GBX 6 251,00 »
+   vaut 62,51 £. C'est une devise à part entière pour Vigie — cours et PRU sont en pence,
+   et le taux GBX → EUR se déduit de la ligne comme pour les autres (≈ 0,012). */
+const Cst_ReDevise = /\b(EUR|USD|GBP|GBX|CHF|JPY|SEK|NOK|DKK|CAD|AUD|HKD)\b/;
 // Repli quand la ligne ne porte que le symbole : l'écran écrit « € 48,25 » et ne
 // répète le code devise qu'une colonne plus loin, parfois pas du tout.
 const Cst_SymbolesDevise = { '€': 'EUR', '$': 'USD', '£': 'GBP', '¥': 'JPY' };
@@ -3554,7 +3557,7 @@ function Fn_PruDeLigne(nb) {
   }
   return null;
 }
-const Cst_ReMarqueDevise = /([€$£¥]|\b(?:EUR|USD|GBP|CHF|JPY|SEK|NOK|DKK|CAD|AUD|HKD)\b)[\s  ]*(?=-?\d)/g;
+const Cst_ReMarqueDevise = /([€$£¥]|\b(?:EUR|USD|GBP|GBX|CHF|JPY|SEK|NOK|DKK|CAD|AUD|HKD)\b)[\s  ]*(?=-?\d)/g;
 function Fn_IndexCours(ligne, apres, debut) {
   Cst_ReMarqueDevise.lastIndex = debut || 0;
   let m;
@@ -3646,7 +3649,7 @@ function Fn_QteDe(s) {
   const m = Cst_ReQte.exec(s) || Cst_ReQteApres.exec(s);
   return m ? { qte: Number(m[1].replace(/[^\d-]/g, '')), index: m.index } : { qte: null, index: Infinity };
 }
-const Cst_ReAncreDevise = /([€$£¥]|\b(?:EUR|USD|GBP|CHF|JPY|SEK|NOK|DKK|CAD|AUD|HKD)\b)\s*(-?[\d\s.,]+)/;
+const Cst_ReAncreDevise = /([€$£¥]|\b(?:EUR|USD|GBP|GBX|CHF|JPY|SEK|NOK|DKK|CAD|AUD|HKD)\b)\s*(-?[\d\s.,]+)/;
 const Cst_ReValidite = /\b(continu|jour|gtc)\b/i;
 /* STATUT D'UNE LIGNE D'HISTORIQUE. L'onglet Ordres > Historique ne liste pas des
    exécutions mais des ÉVÉNEMENTS d'ordre : création, modification, suppression.
@@ -3655,7 +3658,7 @@ const Cst_ReValidite = /\b(continu|jour|gtc)\b/i;
    création de l'ordre, modifié ensuite à 35) et une vente qui était une
    suppression. Le mot de statut est lu, et seule une exécution en est une. */
 const Cst_ReStatutOrdre = /(?:^|[^A-Za-zÀ-ÿ])(Création|Modification|Suppression|Annulation|Annulé|Rejeté|Expiré|Exécution partielle|Exécutée?|Exécution)(?![A-Za-zÀ-ÿ])/i;
-const Cst_CodesDevise = 'EUR|USD|GBP|CHF|JPY|SEK|NOK|DKK|CAD|AUD|HKD';
+const Cst_CodesDevise = 'EUR|USD|GBP|GBX|CHF|JPY|SEK|NOK|DKK|CAD|AUD|HKD';
 const Cst_ReMontantDevise = new RegExp('^(€|\\$|£|¥|' + Cst_CodesDevise + ')\\s*(-?[\\d\\s.,]*\\d|—)$');
 const Cst_ReDateHeure = /^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}:\d{2}(?::\d{2})?))?$/;
 function Fn_DevDe(marque) { return Cst_SymbolesDevise[marque] || marque || null; }
@@ -3920,6 +3923,10 @@ function Fn_AnalyserEntrees() {
     // 1. L'heure de rafraîchissement du courtier est déclarée par l'automate :
     //    plus sûre que la première heure croisée dans le texte de l'écran.
     if (capPos && capPos.marge && meta.maj_degiro) capPos.marge.as = meta.maj_degiro;
+    //    Un compte SANS CRÉDIT (profil DEGIRO « Basic ») n'a pas de marge : son
+    //    « espace libre » est l'argent disponible, pas une distance à l'appel de
+    //    marge. L'automate le déclare (compte=basic) ; le coussin est alors sans objet.
+    if (capPos && capPos.marge && /^basic$/i.test(String(meta.compte || ''))) capPos.marge.sansCredit = true;
     // 2. Une capture dégradée se signale au lieu de passer pour complète.
     if (meta.statut && !/^ok$/i.test(meta.statut)) {
       controles.push({ kind: 'capture_degradee',
@@ -4210,7 +4217,8 @@ function Fn_IntegrerEntrees(an) {
   if (an.capPos && an.capPos.marge) {
     const m = an.capPos.marge;
     Var_State.marge = { titres: Fn_Num(m.titres), cash: Fn_Num(m.cash), vl: Fn_Num(m.vl),
-      risque: Fn_Num(m.risque), libre: Fn_Num(m.libre), as: m.as || null, ts: an.capPos.ts };
+      risque: Fn_Num(m.risque), libre: Fn_Num(m.libre), as: m.as || null, ts: an.capPos.ts,
+      sansCredit: !!m.sansCredit };
   }
   // Taux de change : DÉDUIT du fichier (montant en euros ÷ montant en devise),
   // jamais d'une API de change. Il est daté de la même séance que le fichier.
@@ -4460,7 +4468,9 @@ function Fn_Recalculer() {
   const m = Var_State.marge;
   if (m) {
     m.levier = (Fn_Num(m.vl) && Fn_Num(m.titres) != null) ? Fn_Num(m.titres) / Fn_Num(m.vl) : null;
-    m.coussinPct = (Fn_Num(m.vl) && Fn_Num(m.libre) != null) ? Fn_Num(m.libre) / Fn_Num(m.vl) * 100 : null;
+    // Sans crédit, pas d'appel de marge possible : pas de coussin, donc ni jauge
+    // rouge ni événement « coussin bas » (la règle 7 lit coussinPct).
+    m.coussinPct = (!m.sansCredit && Fn_Num(m.vl) && Fn_Num(m.libre) != null) ? Fn_Num(m.libre) / Fn_Num(m.vl) * 100 : null;
   }
   // SECONDE PASSE : tout ce qui se rapporte à la valeur nette, une fois toutes
   // les valeurs de ligne à jour. Le niveau de traitement en dépend aussi — il se
@@ -4607,6 +4617,7 @@ function Fn_ProfilExposition() {
     valeurNetteEur: base != null ? Math.round(base) : null,
     valeurNetteSrc: vnObj ? vnObj.src : 'valeur nette inconnue (écran de marge non collé) — toute taille en % VN est alors incalculable',
     coussinMargePct: m && m.coussinPct != null ? Math.round(m.coussinPct * 10) / 10 : null,
+    compteSansCredit: !!(m && m.sansCredit),
     margeDisponibleEur: m && Fn_Num(m.libre) != null ? Math.round(Fn_Num(m.libre)) : null,
     levierBrut: m && m.levier != null ? Math.round(m.levier * 100) / 100 : null,
     tresorerieEur: m && Fn_Num(m.cash) != null ? Math.round(Fn_Num(m.cash)) : null,
@@ -5453,7 +5464,10 @@ function Fn_IndicateursDiscipline() {
   // 11. Coussin de marge.
   (function () {
     let valeur = null, aff = '—', zone = null, manquant = null, extra = '';
-    if (!m || m.coussinPct == null) manquant = 'marge disponible et valeur liquidative — le bloc « espace libre » de l’écran des positions';
+    if (m && m.sansCredit) {
+      aff = 'sans objet'; zone = 'ok';
+      extra = 'Compte sans crédit (profil Basic) : aucun emprunt, donc aucun appel de marge possible. L’« espace libre » est l’argent disponible pour investir.';
+    } else if (!m || m.coussinPct == null) manquant = 'marge disponible et valeur liquidative — le bloc « espace libre » de l’écran des positions';
     else {
       valeur = m.coussinPct; aff = Fn_FmtPct(valeur, 1);
       zone = Fn_ZoneSeuil(valeur, s.coussinVert, s.coussinRouge, 'bas');
