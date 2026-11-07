@@ -557,7 +557,7 @@ body.v2 .v2-eteinte{opacity:.6}
 // Estampille posée par publier.js, IDENTIQUE à celle du cache de sw.js. Sert à
 // détecter qu'un onglet resté ouvert exécute encore l'ancien code : il ne navigue
 // pas, donc ne repasse jamais par le réseau, et rien ne l'en avertissait.
-const Cst_Version = 'vigie-202611072108';
+const Cst_Version = 'vigie-202611072122';
 const Cst_CleStockage = 'vigie-portefeuille';
 const Cst_CleApiKey   = 'vigie-portefeuille-apikey'; // localStorage UNIQUEMENT (jamais window.storage, jamais le fichier)
 const Cst_IsArtifact  = !!(window.storage && typeof window.storage.get === 'function');
@@ -4202,6 +4202,12 @@ function Fn_IntegrerEntrees(an) {
     /* Le PRU est un FAIT LU, au même titre que le cours : il s'écrit directement,
        sans passer par une carte à valider. Il ne bouge qu'à l'achat ou à la vente. */
     if (p.pru != null) d.pru = p.pru;
+    /* QUANTITÉ JAMAIS CONNUE. Une quantité connue ne change que par une carte
+       (ecart_quantite). Mais une ligne acceptée alors que sa quantité n'avait pas pu
+       être lue (cours en pence mal découpé, 07/11/26) restait sans quantité, donc
+       sans valeur ni poids, pour toujours : aucune carte ne la proposait. Une
+       quantité VIDE reçoit donc la quantité lue — ce n'est pas un changement. */
+    if (Fn_Num(d.qte) == null && Fn_Num(p.qte) != null) d.qte = p.qte;
     if (p.dev) d.dev = p.dev;
     if (p.nom && p.nom.length > String(d.nom || '').length) d.nom = p.nom; // la capture porte le nom complet
     if (p.ticker && !pos.ticker) pos.ticker = p.ticker; // relevé sur l'écran, jamais deviné
