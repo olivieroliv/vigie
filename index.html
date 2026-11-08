@@ -557,7 +557,7 @@ body.v2 .v2-eteinte{opacity:.6}
 // Estampille posée par publier.js, IDENTIQUE à celle du cache de sw.js. Sert à
 // détecter qu'un onglet resté ouvert exécute encore l'ancien code : il ne navigue
 // pas, donc ne repasse jamais par le réseau, et rien ne l'en avertissait.
-const Cst_Version = 'vigie-202611072122';
+const Cst_Version = 'vigie-202611081728';
 const Cst_CleStockage = 'vigie-portefeuille';
 const Cst_CleApiKey   = 'vigie-portefeuille-apikey'; // localStorage UNIQUEMENT (jamais window.storage, jamais le fichier)
 const Cst_IsArtifact  = !!(window.storage && typeof window.storage.get === 'function');
@@ -598,7 +598,7 @@ function Fn_CoefCacheLecture(id) {
    coût, et un tarif changé resterait faux dans la table jusqu'à la publication
    suivante — c'est arrivé : la relecture du cache de Sonnet 5.5 y était à 0,1×,
    la page dit 0,05×. Les deux copies vivent dans CET appareil, jamais synchronisées. */
-const Cst_UrlTarifs = 'https://raw.githubusercontent.com/juliencalland/vigie/tarifs/tarifs.json';
+const Cst_UrlTarifs = 'https://raw.githubusercontent.com/olivieroliv/vigie/tarifs/tarifs.json';
 const Cst_UrlModelesApi = 'https://api.anthropic.com/v1/models?limit=100';
 const Cst_CatalogueAgeMaxH = 24;
 let Var_Catalogue = null;
@@ -1723,7 +1723,7 @@ function Fn_RemiseAZero() {
    ci-dessous ; « le plus récent gagne » par etatTs. La clé API n'est
    JAMAIS synchronisée (stockage local par appareil).
    ---------------------------------------------------------------- */
-const Cst_SyncDepot = 'juliencalland/vigie-donnees';
+const Cst_SyncDepot = 'olivieroliv/vigie-donnees';
 const Cst_SyncChemin = 'etat.json';
 const Cst_CleSyncToken = 'vigie-portefeuille-ghtoken';
 function Fn_GetSyncToken() { try { return localStorage.getItem(Cst_CleSyncToken) || ''; } catch (e) { return ''; } }

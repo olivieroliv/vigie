@@ -86,7 +86,7 @@ const MODULE_SYNC = `/* --------------------------------------------------------
    dépôt privé ci-dessous ; « le plus récent gagne » par etatTs. La clé
    API Anthropic n'est JAMAIS synchronisée (stockage local par appareil).
    ---------------------------------------------------------------- */
-const Cst_SyncDepot = 'juliencalland/vigie-donnees';
+const Cst_SyncDepot = 'olivieroliv/vigie-donnees';
 const Cst_SyncChemin = 'etat.json';
 const Cst_CleSyncToken = 'vigie-portefeuille-ghtoken';
 function Fn_GetSyncToken() { try { return localStorage.getItem(Cst_CleSyncToken) || ''; } catch (e) { return ''; } }

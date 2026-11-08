@@ -60,6 +60,6 @@ console.log('  ' + git(['log', '--oneline', '-1']));
 /* 4 — push */
 console.log('\n4/4 Envoi vers GitHub…');
 git(['push']);
-console.log('\nPUBLIÉ : https://juliencalland.github.io/vigie/');
+console.log('\nPUBLIÉ : https://olivieroliv.github.io/vigie/');
 console.log('Sur chaque appareil : recharger la page (le service worker se met à jour tout seul,');
 console.log('parfois au deuxième chargement).');
